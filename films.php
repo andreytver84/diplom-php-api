@@ -1,15 +1,17 @@
-<?php 
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: *");
+<?php
+
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: *');
 
 include 'DbConnect.php';
 
 // Получение всех фильмов из таблицы
-function getAllFilms() {
-    $objDb = new DbConnect;
+function getAllFilms()
+{
+    $objDb = new DbConnect();
     $conn = $objDb->connect();
 
-    $sql = "SELECT * FROM films";
+    $sql = 'SELECT * FROM films';
     $stmt = $conn->query($sql);
     $films = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -19,25 +21,26 @@ function getAllFilms() {
 }
 
 // Добавление нового фильма в базу данных
-function createFilm() {
-    $objDb = new DbConnect;
+function createFilm()
+{
+    $objDb = new DbConnect();
     $conn = $objDb->connect();
 
     $film = $_POST;
 
     $uploadDirectory = 'posters/';
-    $uploadedFile = $uploadDirectory . basename($_FILES['file-film']['name']);
+    $uploadedFile = $uploadDirectory.basename($_FILES['file-film']['name']);
     if (move_uploaded_file($_FILES['file-film']['tmp_name'], $uploadedFile)) {
         $image = $uploadedFile;
 
-        $sql = "INSERT INTO films (title, description, time, image) VALUES (:title, :description, :time, :image)";
+        $sql = 'INSERT INTO films (title, description, time, image) VALUES (:title, :description, :time, :image)';
         $stmt = $conn->prepare($sql);
-        $stmt->bindParam(':title', $film["title-film"]);
-        $stmt->bindParam(':description', $film["desc-film"]);
-        $stmt->bindParam(':time', $film["time-film"]);
+        $stmt->bindParam(':title', $film['title-film']);
+        $stmt->bindParam(':description', $film['desc-film']);
+        $stmt->bindParam(':time', $film['time-film']);
         $stmt->bindParam(':image', $image);
 
-        if($stmt->execute()) {
+        if ($stmt->execute()) {
             $response = ['status' => 1, 'message' => 'Фильм успешно добавлен'];
             echo json_encode($response);
         } else {
@@ -53,18 +56,19 @@ function createFilm() {
 }
 
 // Удаление фильма по идентификатору
-function deleteFilm($filmId) {
-    $objDb = new DbConnect;
+function deleteFilm($filmId)
+{
+    $objDb = new DbConnect();
     $conn = $objDb->connect();
 
-    $sql = "DELETE FROM films WHERE id = :id";
+    $sql = 'DELETE FROM films WHERE id = :id';
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':id', $filmId);
 
-    if($stmt->execute()) {
-        echo "Фильм успешно удален";
+    if ($stmt->execute()) {
+        echo 'Фильм успешно удален';
     } else {
-        echo "Ошибка при удалении фильма";
+        echo 'Ошибка при удалении фильма';
     }
 
     $conn = null;
@@ -72,17 +76,16 @@ function deleteFilm($filmId) {
 
 // Обработка запросов API
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  createFilm();
+    createFilm();
 } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-  $filmId = $_GET['id'];
-  if (isset($filmId)) {
-    deleteFilm($filmId);
-  } else {
-    echo "Не указан идентификатор фильма для удаления";
-  }
+    $filmId = $_GET['id'];
+    if (isset($filmId)) {
+        deleteFilm($filmId);
+    } else {
+        echo 'Не указан идентификатор фильма для удаления';
+    }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
-  getAllFilms();
+    getAllFilms();
 } else {
-  echo "Неправильный метод запроса";
+    echo 'Неправильный метод запроса';
 }
-?>
