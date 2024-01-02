@@ -51,4 +51,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Выводим сообщение об успешном добавлении записей
     echo json_encode(['message' => 'Records added successfully.']);
+} elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // Если метод запроса GET, извлекаем данные из таблицы "sessions_afisha"
+    $selectSql = 'SELECT * FROM sessions_afisha';
+    $selectStmt = $conn->prepare($selectSql);
+    $selectStmt->execute();
+    $records = $selectStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Выводим данные в формате JSON
+    echo json_encode($records);
 }
