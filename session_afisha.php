@@ -60,4 +60,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Выводим данные в формате JSON
     echo json_encode($records);
+} elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+    // Получение данных из тела запроса
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    // Проверка наличия необходимых полей в данных
+    if (isset($data['session_id']) && isset($data['conf'])) {
+        // Обновление записи в таблице "sessions_afisha" по session_id
+        $updateSql = 'UPDATE sessions_afisha SET conf = :conf WHERE session_id = :session_id';
+        $updateStmt = $conn->prepare($updateSql);
+        $updateStmt->execute([
+            'conf' => json_encode($data['conf']),
+            'session_id' => $data['session_id'],
+        ]);
+
+        // Вывод сообщения об успешном обновлении записи
+        echo json_encode(['message' => 'Record updated successfully.']);
+    } else {
+        // Вывод сообщения об ошибке в случае отсутствия необходимых полей
+        http_response_code(400);
+        echo json_encode(['error' => 'Missing required fields.']);
+    }
 }
